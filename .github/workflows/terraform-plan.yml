@@ -17,7 +17,7 @@ jobs:
       run:
         working-directory: terraform
     
-    # Azurerm provider and backend secrets in Github
+    # Azurerm provider and backend secrets in Github.
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
