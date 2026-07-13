@@ -1,0 +1,16 @@
+# provider.tf
+# Pins Terraform and provider versions so builds are reproducible.
+
+terraform {
+    required_version = ">= 1.5"
+    required_providers {
+        azurerm = {
+            source  = "hashicorp/azurerm"
+            version = ">= 4.0"
+        }
+    }
+}
+
+provider "azurerm" {
+    features {}
+}
