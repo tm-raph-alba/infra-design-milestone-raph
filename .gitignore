@@ -1,0 +1,5 @@
+# Terraform
+.terraform/
+*.tfstate           # Local state file. 
+*.tfstate.backup    # Backup state file. 
+*.tfvars           # Variables file.
