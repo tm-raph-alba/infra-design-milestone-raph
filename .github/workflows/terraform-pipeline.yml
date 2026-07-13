@@ -54,13 +54,13 @@ jobs:
     defaults:
       run:
         working-directory: terraform
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-        - name: Setup Terraform
-          uses: hashicorp/setup-terraform@v3
-        - name: Terraform Init
-          run: terraform init
-        - name: Terraform Apply
-          run: terraform apply -auto-approve -input=false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false
   
