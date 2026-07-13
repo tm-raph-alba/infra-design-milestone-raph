@@ -36,7 +36,7 @@ resource "azurerm_linux_virtual_machine" "app" {
 
     admin_ssh_key {
         username                        = "azureadmin"
-        public_key                      = file("~/.ssh/vm-capstone.pub")
+        public_key                      = var.vm_ssh_public_key
     }
 
     os_disk {
