@@ -4,7 +4,7 @@
 # Reviewer sees exactly changes that will happen in Azure.
 # Authenticated using service principal secrets.
 
-name: Terraform Pan
+name: Terraform Plan
 
 on:
   pull_request:
@@ -25,6 +25,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       TF_VAR_admin_source_ip: ${{ secrets.TF_VAR_admin_source_ip }}
       TF_VAR_db_admin_password: ${{ secrets.TF_VAR_db_admin_password }}
+      TF_VAR_vm_ssh_public_key: ${{ secrets.TF_VAR_vm_ssh_public_key }}
 
     steps:
       - name: Checkout code
@@ -40,4 +41,4 @@ jobs:
         run: terraform validate
       
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -input=false
