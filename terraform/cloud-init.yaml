@@ -17,6 +17,7 @@ write_files:
           <h1>Hello, World!</h1>
           <p>This is a sample web page for Infra Design Milestone.</p>
           <p> DEPLOYED VIA TERRFAFORMRMMRMR </p>
+          <p> edit: terraform destroyed then redeployed... </p>
         </body>
       </html>
     permissions: '0644'
