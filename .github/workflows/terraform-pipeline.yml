@@ -1,0 +1,66 @@
+# terraform-pipeline.yml
+# Single CI/CD Pipeline for infrastructure-as-code (IaC) using Terraform and GitHub Actions
+# Authenticated using service principal secrets.
+#
+# Runs 'terraform plan' on every pull request to main
+#     Purpose: preview the built infrastructure and catch errors before merging
+#     Reviewer sees exactly changes that will happen in Azure.
+# Runs 'terraform apply' ONLY on push to main, and ONLY if plan was successful
+
+name: Infra CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Azurerm provider and backend secrets in Github.
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_admin_source_ip: ${{ secrets.TF_VAR_admin_source_ip }}
+  TF_VAR_db_admin_password: ${{ secrets.TF_VAR_db_admin_password }}
+  TF_VAR_vm_ssh_public_key: ${{ secrets.TF_VAR_vm_ssh_public_key }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+      
+      - name: Terraform Plan
+        run: terraform plan -input=false
+
+  apply:
+    needs: plan                                                           # will only deploy on successful plan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false
+  
