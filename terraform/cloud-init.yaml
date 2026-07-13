@@ -1,0 +1,25 @@
+#cloud-config
+
+# Instead of SSH-ing in the VM, we can use cloud-init to run commands on first boot.
+package_update: true
+packages:
+  - nginx
+
+write_files:
+  - path: /var/www/html/index.html
+    content: |
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Welcome to my Nginx server!</title>
+        </head>
+        <body>
+          <h1>Hello, World!</h1>
+          <p>This is a sample web page for Infra Design Milestone.</p>
+        </body>
+      </html>
+    permissions: '0644'
+
+runcmd:
+  - systemctl enable nginx
+  - systemctl start nginx

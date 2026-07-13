@@ -50,6 +50,9 @@ resource "azurerm_linux_virtual_machine" "app" {
         sku                             = "server"
         version                         = "latest"
     }
+
+    # Cloud-init: configures nginx on first boot (check cloud-init.yaml)
+    custom_data = base64encode(file("${path.module}/cloud-init.yaml"))
 }
 
 output "vm_public_ip" {
