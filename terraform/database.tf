@@ -1,15 +1,15 @@
-# database.tf 
+# database.tf
+# Managed PostgreSQL resources.
+# This file creates a private PostgreSQL Flexible Server that is reachable only from inside the VNet.
+# The server is deployed in a delegated subnet and uses a private DNS zone for internal name resolution.
 
-# Single managed PostgreSQL Flexible Server instance, with VNet integration.
-# Only app subnet can reach it
-
-# Sizing: B1ms burstable tier (1 vCPU, 2GB RAM) 
-
+# Private DNS Zone for PostgreSQL
 resource "azurerm_private_dns_zone" "postgres" {
     name                    = "capstone-raph.postgres.database.azure.com"
     resource_group_name     = azurerm_resource_group.main.name
 }
 
+# Private DNS Zone link to the VNet
 resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
     name                    = "psql-dns-link"
     resource_group_name     = azurerm_resource_group.main.name
@@ -17,6 +17,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
     virtual_network_id      = azurerm_virtual_network.main.id
 }
 
+# PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "main" {
     name                          = "psql-app-raph-001"
     resource_group_name           = azurerm_resource_group.main.name
@@ -26,7 +27,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
     administrator_login           = "psqladmin"
     administrator_password        = var.db_admin_password
 
-    sku_name                      = "B_Standard_B1ms"       # burstable tier, 1 vCPU, 2GB RAM
+    sku_name                      = "B_Standard_B1ms"       # Sizing: burstable tier, 1 vCPU, 2GB RAM
     storage_mb                    = 32768                   # 32GB
 
     public_network_access_enabled = false                   # no internet exposure, only reachable from app subnet

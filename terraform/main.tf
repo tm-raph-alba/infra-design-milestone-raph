@@ -1,7 +1,7 @@
-# main.tf 
-# All application infrastructure stays in this resource group.
-# Terraform state backend lives in a seperate resource group (rg-capstone-backend-raph)
-# to avoid accidental deletion of the state file.
+# main.tf
+# Core application resource group.
+# This file creates the main resource group that hosts the VM, networking, and database resources.
+# The Terraform state backend is intentionally kept in a separate resource group so it is not removed by accident.
 
 resource "azurerm_resource_group" "main" {
     name            = "rg-capstone-raph"

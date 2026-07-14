@@ -1,8 +1,9 @@
-# nsg.tf 
-# Two NSGs implementing security:
-#   - nsg-app:  web open to public, SSH restricted to admin IP 
-#   - nsg-db:   PostgreSQL port reachable ONLY from the app subnet, no internet exposure
+# nsg.tf
+# Network security groups for the app and database tiers.
+# The app NSG allows public web access and restricted SSH access.
+# The database NSG allows PostgreSQL traffic only from the app subnet, and Azure denies everything else by default.
 
+# App NSG
 resource "azurerm_network_security_group" "app" {
     name                = "nsg-app-public-raph"
     location            = azurerm_resource_group.main.location
@@ -45,6 +46,7 @@ resource "azurerm_network_security_group" "app" {
   }
 }
 
+# Database NSG
 resource "azurerm_network_security_group" "db" {
     name                = "nsg-db-private-raph"
     location            = azurerm_resource_group.main.location

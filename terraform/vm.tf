@@ -1,4 +1,6 @@
-# vm.tf 
+# vm.tf
+# Application VM resources.
+# This file provisions the public IP, NIC, and Linux VM that hosts the web application.
 
 # Public IP the users connect to.
 resource "azurerm_public_ip" "app" {
@@ -10,7 +12,7 @@ resource "azurerm_public_ip" "app" {
 }
 
 # NIC - VM Network card
-# Inside the app subnet and carries the public IP
+# Inside the public app subnet and carries the public IP
 resource "azurerm_network_interface" "app" {
     name                                = "nic-app-raph-001"
     location                            = azurerm_resource_group.main.location

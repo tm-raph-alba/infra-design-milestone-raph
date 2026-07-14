@@ -6,6 +6,7 @@
 # Separating app and DB into different subnets lets us apply different firewall (NSG) rules to each. 
 # The DB only accepts traffic from the app subnet.
 
+# Virtual Network
 resource "azurerm_virtual_network" "main" {
   name                = "vnet-app-sea-001"
   address_space       = ["10.0.0.0/16"]
@@ -13,6 +14,7 @@ resource "azurerm_virtual_network" "main" {
   resource_group_name = azurerm_resource_group.main.name
 }
 
+# App Subnet
 resource "azurerm_subnet" "app" {
   name                 = "snet-app-public"
   resource_group_name  = azurerm_resource_group.main.name
@@ -20,6 +22,7 @@ resource "azurerm_subnet" "app" {
   address_prefixes     = ["10.0.0.0/24"]
 }
 
+# DB Subnet
 resource "azurerm_subnet" "db" {
   name                 = "snet-db-private"
   resource_group_name  = azurerm_resource_group.main.name
@@ -27,8 +30,8 @@ resource "azurerm_subnet" "db" {
   address_prefixes     = ["10.0.1.0/24"]
   service_endpoints    = ["Microsoft.Storage"]
 
-  # PostgreSQL Flexible Server with VNet integration requires a subnet
-  # delegated exclusively to it so no other resource types can share it.
+  # PostgreSQL Flexible Server requires a dedicated subnet delegation.
+  # No other service types should share this subnet.
   delegation {
     name = "psql-delegation"
     service_delegation {
