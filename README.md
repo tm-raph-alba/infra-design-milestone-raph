@@ -47,6 +47,62 @@ A second resource group, `rg-capstone-backend-raph`, holds the Terraform state s
 ```
 
 ---
+## Getting Started
+Cloning this repo is not enough by itself — the state backend, credentials, and secrets are deliberately **not** in the repository. To stand up your own copy:
+ 
+**Prerequisites:** an Azure subscription, Azure CLI (`az`), Terraform ≥ 1.5, and a GitHub account. All commands assume a Linux shell (WSL works).
+ 
+**1. Fork/clone the repo** and log in to Azure:
+ 
+```bash
+az login
+az account show -o table    # confirm the right subscription is active
+```
+ 
+**2. Create your own state backend** (see the one-time bootstrap below.) Then update `terraform/backend.tf` to match.
+ 
+**3. Create your inputs.** Generate an SSH key pair and write your local `terraform/terraform.tfvars` (gitignored)
+ 
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/vm-capstone -C "vm-admin"
+```
+ 
+```hcl
+# terraform/terraform.tfvars
+admin_source_ip   = "<your-public-ip>/32"                  # curl -s ifconfig.me
+db_admin_password = "<strong-password-16+chars>"
+vm_ssh_public_key = "<contents of ~/.ssh/vm-capstone.pub>"
+```
+ 
+**4. First, deploy locally, to verify everything works before wiring CI:**
+ 
+```bash
+cd terraform
+terraform init
+terraform plan     
+terraform apply
+```
+ 
+The apply prints `vm_public_ip` — open `http://<that-ip>` in a browser. You should see the page.
+ 
+**5. Wire up the pipeline.** Create an Azure service principal and add **seven GitHub repository secrets** (Settings → Secrets and variables → Actions):
+ 
+| Secret | Value |
+|---|---|
+| `AZURE_CLIENT_ID` | the service principal's appId |
+| `AZURE_CLIENT_SECRET` | its client secret |
+| `AZURE_TENANT_ID` | your tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | your subscription ID |
+| `TF_VAR_admin_source_ip` | same value as in your tfvars |
+| `TF_VAR_db_admin_password` | same value as in your tfvars |
+| `TF_VAR_vm_ssh_public_key` | same value as in your tfvars |
+ 
+The service principal needs at least **Contributor** on the app resource group and data access to the state storage account.
+ 
+**6. Protect `main`**: require a pull request and require the `plan` status check to pass before merging.
+ 
+From here, the workflow is: branch → edit → PR (review the plan) → merge (apply runs). To tear everything down: `terraform destroy` from `terraform/` — the state backend survives and the environment can be rebuilt by the pipeline at any time.
+---
 
 ## One-time bootstrap (manual step)
 
@@ -80,8 +136,7 @@ One workflow (`terraform-pipeline.yml`) has two jobs modeled on the standard tes
 
 **Merging is the approval.** Branch protection on `main` requires the plan check to pass (and a PR) before merge is possible, so an unreviewed or failing plan cannot deploy.
 
-**Env Authentication:** a bootcamp-provided Azure service principal using a client secret, supplied to the workflow via GitHub repository secrets. Terraform input variables that cannot live in the repo (admin IP, DB password, SSH public key) are injected as `TF_VAR_*` secrets.
-
+**Env Authentication:** a bootcamp-provided Azure service principal using a client secret, supplied to the workflow via GitHub repository secrets. Terraform input variables that cannot live in the repo (admin IP, DB password, SSH public key) are injected as `TF_VAR_*` secrets and Github Secrets.
 
 ---
 
