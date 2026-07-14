@@ -26,6 +26,29 @@ A second resource group, `rg-capstone-backend-raph`, holds the Terraform state s
 
 ---
 
+### Network security (NSG rules)
+ 
+Each subnet has a Network Security Group attached — Azure's firewall layer. The rules below are the complete inbound policy; anything not explicitly allowed is denied by Azure's default rules.
+ 
+**`nsg-app-public-raph`** (on `snet-app-public`, where the VM lives):
+ 
+| Priority | Port | Protocol | Allowed from | Purpose |
+|---|---|---|---|---|
+| 100 | 443 | TCP | Anywhere | HTTPS — the public website |
+| 110 | 80 | TCP | Anywhere | HTTP — the public website |
+| 120 | 22 | TCP | Admin IP only (`/32`) | SSH — administrative access |
+| — | everything else | — | **Denied** | Azure default deny |
+ 
+**`nsg-db-private-raph`** (on `snet-db-private`, where PostgreSQL lives):
+ 
+| Priority | Port | Protocol | Allowed from | Purpose |
+|---|---|---|---|---|
+| 100 | 5432 | TCP | App subnet only (`10.0.0.0/24`) | PostgreSQL — the VM is the only permitted client |
+| — | everything else | — | **Denied** | Azure default deny |
+
+ 
+---
+
 ## Repository structure
 
 ```
@@ -98,13 +121,14 @@ The apply prints `vm_public_ip` — open `http://<that-ip>` in a browser. You sh
 | `TF_VAR_vm_ssh_public_key` | same value as in your tfvars |
  
 The service principal needs at least **Contributor** on the app resource group and data access to the state storage account.
- 
-**6. Protect `main`**: require a pull request and require the `plan` status check to pass before merging.
- 
-From here, the workflow is: branch → edit → PR (review the plan) → merge (apply runs). To tear everything down: `terraform destroy` from `terraform/` — the state backend survives and the environment can be rebuilt by the pipeline at any time.
+
+**6. Protect `main`** require a pull request and require the `plan` status check to pass before merging.
+
 ---
 
 ## One-time bootstrap (manual step)
+
+
 
 Terraform needs somewhere to store its state *before* it can manage anything. The state backend is therefore created once with the Azure CLI and never touched again:
 
@@ -148,7 +172,7 @@ One workflow (`terraform-pipeline.yml`) has two jobs modeled on the standard tes
 
 **Private-only database.** The Flexible Server runs in VNet-integrated mode in a delegated subnet with a private DNS zone. It has no public endpoint from outside the VNet. Access is doubly restricted: Resides in a private subnet plus an NSG rule allowing 5432 only from the app subnet.
 
-**NSG rules** The NSGs (Azure's firewall layer) define three inbound rules:
+**NSG rules.** The NSGs (Azure's firewall layer) define three inbound rules:
  
 - **Ports 80/443 (the website):** accept connections from any IP address. This is for public so anyone should be able to load the site.
 - **Port 22 (SSH — remote terminal access to the VM):** accepts connections from the administrator's IP address, and through SSH keys only.
@@ -195,7 +219,6 @@ Burstable tiers (B-series) fit the workload: ≤50 concurrent users with idle-he
 
 - **HTTP only (no TLS to users).** Certificates require a DNS name; this deployment has only a bare IP, which changes on rebuild.
 - **Out of scope per brief:** multi-region/HA, auth/SSO, production monitoring/SLOs, model fine-tuning.
-- **Any content change replaces the VM.** Application content is currently baked into cloud-init.yaml, which runs only on a VM's first boot — so even a one-line HTML edit forces Terraform to destroy and recreate the VM.
 ---
 
 ## Runbook
