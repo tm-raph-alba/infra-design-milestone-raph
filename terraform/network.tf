@@ -25,6 +25,7 @@ resource "azurerm_subnet" "db" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.0.1.0/24"]
+  service_endpoints    = ["Microsoft.Storage"]
 
   # PostgreSQL Flexible Server with VNet integration requires a subnet
   # delegated exclusively to it so no other resource types can share it.
