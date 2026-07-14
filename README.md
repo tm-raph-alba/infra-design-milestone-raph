@@ -87,7 +87,9 @@ One workflow (`terraform-pipeline.yml`) has two jobs modeled on the standard tes
 
 ## Design decisions
 
-**Managed PostgreSQL instead of a database on the VM.** The brief lists "single VM" and "single DB" as separate constraints, signaling two resources. The managed service provides automated backups, patching, and resource isolation for ~USD 15–25/month — responsibilities that would otherwise fall on a single unmonitored VM. The VM is the stateless, rebuildable tier; the database is the stateful tier on infrastructure designed to protect state.
+**VM sizing: Standard_B2s_v2 (2 vCPU, 8 GB, burstable).** The burstable (B-series) family matches the workload shape. A web server with ≤50 concurrent users is fit in a low CPU baseline plus burst credits. The same burstable reasoning applies to the database tier (B1ms), and the VM's OS disk uses Standard_LRS because it serves only the OS and static content.
+
+**Managed PostgreSQL instead of a database on the VM.** The brief lists "single VM" and "single DB" as separate constraints. The PSQL managed service provides automated backups, patching, and resource isolation for ~USD 20/month.
 
 **Private-only database.** The Flexible Server runs in VNet-integrated mode in a delegated subnet with a private DNS zone. It has no public endpoint from outside the VNet. Access is doubly restricted: Resides in a private subnet plus an NSG rule allowing 5432 only from the app subnet.
 
