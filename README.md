@@ -101,11 +101,6 @@ One workflow (`terraform-pipeline.yml`) has two jobs modeled on the standard tes
 
 **Service principal with client secret; OIDC attempted.** OIDC federation (no stored secrets) was attempted on the provided service principal but blocked by tenant permissions on the app registration. Client-secret auth is used with the secret stored only in GitHub repository secrets. In production, OIDC federation would be the first improvement. *Observation:* the provided SP holds Owner at subscription scope; least-privilege would scope Contributor to `rg-capstone-raph` only.
 
-** put this in limitations
-**Immutable-style content deploys.** Changing app content in `cloud-init.yaml` replaces the VM (~3–5 min) rather than mutating a running server. Accepted deliberately: single environment, ≤50 users, no SLOs (explicitly out of scope), and it re-proves VM disposability on every change. The production alternative — decoupled content deploys via `az vm run-command` or SSH from the runner — is understood and documented as the next step if content changes become frequent.
-
-**Storage service endpoint on the DB subnet.** Azure automatically adds a `Microsoft.Storage` service endpoint to the delegated subnet (the Flexible Server uses Azure Storage for backups). <!-- ADJUST to match your experiment's outcome: either "This is declared in network.tf so Terraform and reality agree" or describe what you observed -->
-
 **Secrets hygiene.** State files and `terraform.tfvars` are gitignored.
 
 ---
@@ -155,4 +150,4 @@ Burstable tiers (B-series) fit the workload: ≤50 concurrent users with idle-he
 | Change infrastructure | Edit `terraform/`, branch → PR (review the plan) → merge |
 | Change app content | Edit `cloud-init.yaml`, same flow (expect VM replacement and new SSH host key) |
 | Rebuild everything | `terraform destroy`, then merge any change — the pipeline restores the world |
-| Rotate the DB password | Update the GitHub secret `TF_VAR_db_admin_password` *and* local `terraform.tfvars`, then apply |
+| Change the DB password | Update the GitHub secret `TF_VAR_db_admin_password` *and* local `terraform.tfvars`, then apply |
