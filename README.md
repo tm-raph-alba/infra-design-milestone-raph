@@ -48,7 +48,7 @@ A second resource group, `rg-capstone-backend-raph`, holds the Terraform state s
 
 ---
 
-## One-time bootstrap (the only manual step)
+## One-time bootstrap (manual step)
 
 Terraform needs somewhere to store its state *before* it can manage anything. The state backend is therefore created once with the Azure CLI and never touched again:
 
