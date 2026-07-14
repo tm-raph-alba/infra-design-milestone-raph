@@ -99,8 +99,6 @@ One workflow (`terraform-pipeline.yml`) has two jobs modeled on the standard tes
 
 **No NAT gateway.** Evaluated but rejected. The VM already has its own PIP attached to the NIC which serves both inbound and outbound traffic, and the managed PostgreSQL service handles its own connectivity. Adding one (~USD 32+/month) would spend budget on a problem this architecture doesn't have.
 
-**Service principal with client secret; OIDC attempted.** OIDC federation (no stored secrets) was attempted on the provided service principal but blocked by tenant permissions on the app registration. Client-secret auth is used with the secret stored only in GitHub repository secrets. In production, OIDC federation would be the first improvement. *Observation:* the provided SP holds Owner at subscription scope; least-privilege would scope Contributor to `rg-capstone-raph` only.
-
 **Secrets hygiene.** State files and `terraform.tfvars` are gitignored.
 
 ---
@@ -122,7 +120,7 @@ nc -zv psql-app-raph-001.postgres.database.azure.com 5432
 ![PSQL network working](image-1.png)
 
 
-**Destroy-and-rebuild (reliability proof).** The complete environment was destroyed (`terraform destroy`, ~14 resources) and rebuilt exclusively through the pipeline (PR → plan showing 14 to add → merge → apply). The rebuilt environment passed all the same verification tests. The state backend survived as designed.
+**Destroy-and-rebuild (reliability proof).** The complete environment was destroyed and rebuilt exclusively through the pipeline (PR → plan showing to add → merge → apply). The rebuilt environment passed all the same verification tests. The state backend survived as designed.
 
 **CI/CD gating.** On PRs, the apply job shows as *skipped* while plan runs; on merge, both execute. Branch protection blocks merging on a failed plan.
 
