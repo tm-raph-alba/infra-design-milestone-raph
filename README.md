@@ -6,7 +6,7 @@ A complete infrastructure-as-code deployment on Azure: a single VM serving nginx
 
 ## Architecture
 
-![solution architecture diagram](image.png)
+![archi diagram](image-3.png)
 
 **User Request flow:** Users → HTTPS/HTTP → Public IP (`pip-app-raph-001`) → NSG filter → VM (`vm-app-raph-001`, nginx) → private DNS → PostgreSQL (`psql-app-raph-001`) on port 5432.
 
